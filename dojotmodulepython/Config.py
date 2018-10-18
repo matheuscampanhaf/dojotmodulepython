@@ -1,9 +1,12 @@
 import os
 
+
 class Config:
 
     def __init__(self):
         self.kafka = {
+            "host": os.environ.get('KAFKA_HOST', "kafka"),
+            "port": os.environ.get('KAFKA_PORT', "9092"),
             "producer": {
                 "client.id": "kafka",
                 "metadata.broker.list": os.environ.get('KAFKA_HOSTS', "kafka:9092"),
@@ -21,7 +24,7 @@ class Config:
                 "metadata.broker.list": os.environ.get('KAFKA_HOSTS', "kafka:9092")
             }
         }
-        self.dataBroker = {
+        self.data_broker = {
             "host": os.environ.get('DATA_BROKER_URL', "http://data-broker")
         }
 
@@ -29,16 +32,16 @@ class Config:
             "host": os.environ.get('AUTH_URL', "http://auth:5000")
         }
 
-        self.deviceManager = {
-            "host": os.environ.get('DEVICE_MANAGER_URL', "http://auth:5000")
+        self.device_manager = {
+            "host": os.environ.get('DEVICE_MANAGER_URL', "http://device-manager:5000")
         }
 
         self.dojot = {
-            "managementService": os.environ.get('DOJOT_SERVICE_MANAGEMENT', "dojot-management"),
+            "management_service": os.environ.get('DOJOT_SERVICE_MANAGEMENT', "dojot-management"),
             "subjects": {
                 "tenancy": os.environ.get('DOJOT_SUBJECT_TENANCY', "dojot.tenancy"),
                 "devices": os.environ.get('DOJOT_SUBJECT_DEVICES', "dojot.device-manager.device"),
-                "deviceData": os.environ.get('DOJOT_SUBJECT_DEVICE_DATA', "device-data")
+                "device_data": os.environ.get('DOJOT_SUBJECT_DEVICE_DATA', "device-data")
             }
         }
 
