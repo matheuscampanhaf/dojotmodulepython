@@ -1,0 +1,11 @@
+setup.py
+dojotmodulepython/__init__.py
+dojotmodulepython/auth.py
+dojotmodulepython/config.py
+dojotmodulepython/sample.py
+dojotmodulepython.egg-info/PKG-INFO
+dojotmodulepython.egg-info/SOURCES.txt
+dojotmodulepython.egg-info/dependency_links.txt
+dojotmodulepython.egg-info/not-zip-safe
+dojotmodulepython.egg-info/requires.txt
+dojotmodulepython.egg-info/top_level.txt
