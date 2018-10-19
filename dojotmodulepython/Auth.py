@@ -3,7 +3,6 @@ from .Config import config
 import base64
 import json
 
-
 class Auth:
 
     def get_management_token(self, tenant):
