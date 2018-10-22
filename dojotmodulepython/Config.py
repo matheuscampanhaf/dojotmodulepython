@@ -5,8 +5,9 @@ class Config:
 
     def __init__(self):
         self.kafka = {
-            "host": os.environ.get('KAFKA_HOST', "kafka"),
+            "address": os.environ.get('KAFKA_ADDRESS', "kafka"),
             "port": os.environ.get('KAFKA_PORT', "9092"),
+            "host": os.environ.get('KAFKA_HOST',"kafka:9092"),
             "producer": {
                 "client.id": "kafka",
                 "metadata.broker.list": os.environ.get('KAFKA_HOSTS', "kafka:9092"),
@@ -25,7 +26,7 @@ class Config:
             }
         }
         self.data_broker = {
-            "host": os.environ.get('DATA_BROKER_URL', "http://data-broker")
+            "host": os.environ.get('DATA_BROKER_HOST', "http://data-broker")
         }
 
         self.auth = {
