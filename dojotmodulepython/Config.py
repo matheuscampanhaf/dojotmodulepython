@@ -30,11 +30,11 @@ class Config:
         }
 
         self.auth = {
-            "host": os.environ.get('AUTH_URL', "http://auth:5000")
+            "host": os.environ.get('AUTH_HOST', "http://auth:5000")
         }
 
         self.device_manager = {
-            "host": os.environ.get('DEVICE_MANAGER_URL', "http://device-manager:5000")
+            "host": os.environ.get('DEVICE_MANAGER_HOST', "http://device-manager:5000")
         }
 
         self.dojot = {

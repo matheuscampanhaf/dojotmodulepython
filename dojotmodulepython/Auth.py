@@ -21,8 +21,7 @@ class Auth:
 
     def get_tenants(self):
 
-        url = "http://172.20.0.17:5000" + "/admin/tenants"
-        print(url)
+        url = config.auth['host'] + "/admin/tenants"
         ret = requests.get(url, headers={'authorization': self.get_management_token(config.dojot['management_service'])})
         payload = ret.json()
         
