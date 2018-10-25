@@ -5,24 +5,16 @@ from dojotmodulepython.kafka import Producer
 from dojotmodulepython import auth
 from dojotmodulepython import Messenger
 
+def does_nothing(tenant,data):
+    print("[SUCCESS] received message!!! tenant: %s, data: %s" % (tenant,data))
 
 def main():
     print(config.dojot['subjects']['tenancy'])
     messenger = Messenger("Matheus")
     messenger.init()
     print("\n")
-    messenger.create_channel(config.dojot['subjects']['device_data'], "w")
-    messenger.publish(config.dojot['subjects']['device_data'], "admin", {
-        "metadata": {
-            "deviceid": "c6ea4b",
-            "tenant": "admin",
-            "timestamp": 1528226137452,
-            "templates": [2, 3]
-        },
-        "attrs": {
-            "humidity": 60
-        }
-    })
+    messenger.create_channel(config.dojot['subjects']['device_data'], "passwd")
+    messenger.on("device-data","message",does_nothing,True)
 
 
 if __name__ == "__main__":

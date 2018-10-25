@@ -20,8 +20,8 @@ class Messenger():
         self.queued_messages = []
         self.instance_id = name + str(uuid.uuid4())
 
-        producer = Producer()
-        ret = producer.init()
+        self.producer = Producer()
+        ret = self.producer.init()
 
         if ret:
             print("Producer for module %s is ready" % self.instance_id)
@@ -82,8 +82,8 @@ class Messenger():
 
         self.tenants.append(data['tenant'])
         for sub in self.subjects:
-            self.__bootstrap_tenant(sub, tenant, self.subjects[sub]['mode'])
-        self.emit(config.dojot['subjects']['tenancy'], config.dojot['management_service'], "message", data['tenant'])
+            self.__bootstrap_tenants(sub, tenant, self.subjects[sub]['mode'])
+        self.emit(config.dojot['subjects']['tenancy'], config.dojot['management_service'], "new-tenant", data['tenant'])
 
 
 
@@ -105,7 +105,7 @@ class Messenger():
 
 
 
-    def on(self, subject, event, callback):
+    def on(self, subject, event, callback, test=False):
         """
             Register new callbacks to be invoked when something happens to a subject
             The callback should have two parameters: tenant, data
@@ -122,6 +122,9 @@ class Messenger():
         
         if(subject not in self.subjects and subject not in self.global_subjects):
             self.create_channel(subject)
+
+        if test:
+            self.consumer.run()
 
     
 
@@ -144,6 +147,7 @@ class Messenger():
             self.subjects[subject] = dict()
             self.subjects[subject]['mode'] = mode
 
+        print("tenants in create channel: %s" % self.tenants)
         for tenant in associated_tenants:
             self.__bootstrap_tenants(subject, tenant, mode, is_global)
 
@@ -168,8 +172,9 @@ class Messenger():
             print("Got topic for subject %s and tenant %s: %s" % (subject,tenant,ret_topic))
             self.topics.append(ret_topic)
 
-            if ("r" in mode):
-                self.consumer.subscription([topic],tenant)
+            if ("passwd" in mode):
+                self.consumer = Consumer(ret_topic, lambda messages: self.__process_kafka_messages(tenant, subject, messages), "history")
+                print("ok till here")
 
             if("w" in mode):
                 print("Adding a producer topic.")
@@ -181,21 +186,21 @@ class Messenger():
 
 
 
-    def __process_kafka_messages(self, subject, tenant, messages):
+    def __process_kafka_messages(self,tenant, subjects, messages):
         """
             TODO: write something
         """
-        print("Received messages: %s" % messages)
-        # self.emit(subject, tenantm "message", messages['value'].encode('utf-8'))
+        print("[Process kafka messages] Received messages: %s" % messages)
+        self.emit(subjects, tenant, "message", messages)
 
     def publish(self, subject, tenant, message):
         """
             TODO: write something
         """
 
-        if(self.producer.is_ready == False):
-            self.queued_messages.append({"subject": subject, "tenant": tenant, "message": message})
-            return
+        # if(self.producer.is_ready == False):
+        #     self.queued_messages.append({"subject": subject, "tenant": tenant, "message": message})
+        #     return
 
         print("Trying to publish something on kafka, current producer-topics: %s" % self.producer_topics)
         
@@ -210,4 +215,6 @@ class Messenger():
             return
 
         self.producer.produce(self.producer_topics[subject][tenant], message)
+
+        print("Published message: %s on topic %s" % (message,self.producer_topics[subject][tenant]))
 

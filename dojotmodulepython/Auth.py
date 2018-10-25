@@ -8,8 +8,8 @@ class Auth:
     def get_management_token(self, tenant):
 
         userinfo = {
-            "username": tenant,
-            "service": config.dojot["management_service"]
+            "username": config.dojot["management_service"],
+            "service": tenant
         }
 
         jwt = "{}.{}.{}".format(base64.b64encode("model".encode()).decode(),

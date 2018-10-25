@@ -26,6 +26,7 @@ class Consumer:
                 print("Ignoring assertion error %s %s" % (self.topic,error))
                 time.sleep()
 
+
     def run(self):
         print("Creating consumer on %s on group %s and topic %s" % (self.broker, self.group_id, self.topic))
         self.consumer = KafkaConsumer(bootstrap_servers=self.broker, group_id=self.group_id)
@@ -34,9 +35,8 @@ class Consumer:
         print("Consumer created %s" % self.topic)
 
         for msg in self.consumer:
-            print("Got new kafka event %s %s" % (self.topic, msg))
             try:
-                self.callback(msg)
+                self.callback(msg.value)
             except Exception as error:
                 print("Data handler raised an unknown exception. Ignoring: %s" % error)
 
