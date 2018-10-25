@@ -6,7 +6,8 @@ from dojotmodulepython import auth
 from dojotmodulepython import Messenger
 
 def main():
-    messenger = Messenger("Matheus",None)
+    print(config.dojot['subjects']['tenancy'])
+    messenger = Messenger("Matheus")
     messenger.init()
 
 if __name__=="__main__":

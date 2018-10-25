@@ -9,7 +9,7 @@ from .Auth import auth
 
 class Messenger():
 
-    def __init__(self, name, config=None):
+    def __init__(self, name):
         self.topic_manager = TopicManager()
         self.event_callbacks = dict()
         self.tenants = []
@@ -19,7 +19,6 @@ class Messenger():
         self.global_subjects = dict()
         self.queued_messages = []
         self.instance_id = name + str(uuid.uuid4())
-        self.config = config
 
         producer = Producer()
         ret = producer.init()
@@ -33,8 +32,7 @@ class Messenger():
         else:
             print("Could not create producer")
             # TODO: process.exit()
-
-        #self.create_channel(self.config.dojot['subjects']['tenancy'], "r", True)
+        self.create_channel(config.dojot['subjects']['tenancy'], "r", True)
 
 
 
@@ -42,8 +40,7 @@ class Messenger():
         """
         Initializes the messenger and sets with all tenants
         """
-        self.on(config.dojot['subjects']['tenancy'],
-                "message", self.process_new_tenant)
+        self.on(config.dojot['subjects']['tenancy'], "message", self.process_new_tenant)
         try:
             ret_tenants = auth.get_tenants()
             print("Retrieved list of tenants")
@@ -85,9 +82,8 @@ class Messenger():
 
         self.tenants.append(data['tenant'])
         for sub in self.subjects:
-            a="a"
-            # self.bootstrap_tenant(sub, tenant, self.subjects[sub]['mode'])
-        self.emit(config.dojot['subjects']['tenancy'], config.dojot['management_service'], "new-tenant", data['tenant'])
+            self.__bootstrap_tenant(sub, tenant, self.subjects[sub]['mode'])
+        self.emit(config.dojot['subjects']['tenancy'], config.dojot['management_service'], "message", data['tenant'])
 
 
 
@@ -123,7 +119,7 @@ class Messenger():
             self.event_callbacks[subject][event] = []
 
         self.event_callbacks[subject][event].append(callback)
-
+        
         if(subject not in self.subjects and subject not in self.global_subjects):
             self.create_channel(subject)
 
@@ -141,10 +137,13 @@ class Messenger():
 
         if(is_global == True):
             associated_tenants = [config.dojot['management_service']]
+            self.global_subjects[subject] = dict()
+            self.global_subjects[subject]['mode'] = mode
         else:
             associated_tenants = self.tenants
-            self.tenants[subject] = {"mode": mode}
-        
+            self.subjects[subject] = dict()
+            self.subjects[subject]['mode'] = mode
+
         for tenant in associated_tenants:
             self.__bootstrap_tenants(subject, tenant, mode, is_global)
 
@@ -162,7 +161,6 @@ class Messenger():
 
         try:
             ret_topic = self.topic_manager.get_topic(tenant, subject, config.data_broker['host'], is_global)
-            
             if (ret_topic in self.topics):
                 print("Already have a topic for %s@%s" % (subject,tenant))
                 return
@@ -171,7 +169,7 @@ class Messenger():
             self.topics.append(ret_topic)
 
             if ("r" in mode):
-                self.consumer.subscribe(topic, callback)
+                self.consumer.subscription([topic],tenant)
 
             if("w" in mode):
                 print("Adding a producer topic.")
@@ -181,8 +179,35 @@ class Messenger():
         except Exception as error:
             print("Could not get topic: %s" % error)
 
-    def __process_kafka_messages(self, subject, tenant, messages):
-        print("Received messages: %s" %s messages)
-        self.emit(subject, tenantm "message", messages['value'].encode('utf-8'))
 
+
+    def __process_kafka_messages(self, subject, tenant, messages):
+        """
+            TODO: write something
+        """
+        print("Received messages: %s" % messages)
+        # self.emit(subject, tenantm "message", messages['value'].encode('utf-8'))
+
+    def publish(self, subject, tenant, message):
+        """
+            TODO: write something
+        """
+
+        if(self.producer.is_ready == False):
+            self.queued_messages.append({"subject": subject, "tenant": tenant, "message": message})
+            return
+
+        print("Trying to publish something on kafka, current producer-topics: %s" % self.producer_topics)
+        
+        if (subject not in self.producer_topics):
+            print("No producer was created for subject %s" % subject)
+            print("Discarding message %s" % message)
+            return
+
+        if(tenant not in self.producer_topics[subject]):
+            print("No producer was created for subject %s@%s. Maybe it was not registered?" % (subject,tenant))
+            print("Discarding message %s" % message)
+            return
+
+        self.producer.produce(self.producer_topics[subject][tenant], message)
 
