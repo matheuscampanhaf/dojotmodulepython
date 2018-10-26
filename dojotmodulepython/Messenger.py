@@ -34,7 +34,7 @@ class Messenger():
             print("Could not create producer")
             # TODO: process.exit()
 
-        self.consumer = Consumer("history" + str(uuid.uuid4()))
+        self.consumer = Consumer("history"+ str(uuid.uuid4()))
         # self.consumer.start()
 
         self.create_channel(config.dojot['subjects']['tenancy'], "rw", True)
@@ -166,6 +166,7 @@ class Messenger():
 
         try:
             ret_topic = self.topic_manager.get_topic(tenant, subject, config.data_broker['host'], is_global)
+            print(">>>>>>>>>>>> Got topics: %s" % (json.dumps(ret_topic)))
             if (ret_topic in self.topics):
                 print("Already have a topic for %s@%s" % (subject,tenant))
                 return
@@ -177,7 +178,10 @@ class Messenger():
                 print("Telling consumer to subscribe to new topic")
                 self.consumer.subscribe(ret_topic, self.__process_kafka_messages)
                 if(len(self.topics) == 1):
+                    print(">>>>>>>> Starting consumer thread")
                     self.consumer.start()
+                else:
+                    print(">>>>>>>> Consumer thread is already started")
                 print("ok till here")
 
             if("w" in mode):

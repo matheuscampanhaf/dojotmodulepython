@@ -22,8 +22,8 @@ class Consumer(threading.Thread):
         init = False
         while not init:
             try:
-                self.consumer.poll()
-                self.consumer.seek_to_end()
+                # self.consumer.poll()
+                # self.consumer.seek_to_end()
                 init = True
             except AssertionError as error:
                 print("Ignoring assertion error %s %s" % (self.topics,error))
@@ -35,6 +35,7 @@ class Consumer(threading.Thread):
             print("Current topic list: %s" % self.topics)
             self.topics.append(topic)
             self.consumer.subscribe(topics=self.topics)
+            print(">>>>>>>>>><<<< >><Current subscriptions: %s" % (self.consumer.subscription()))
             print("Subscribed to topic %s" % topic)
             print("Current topic list: %s" % self.topics)
             self.callback = callback
